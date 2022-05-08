@@ -249,7 +249,7 @@ class MappingTool:
         return result_feature
 
 
-class IntraAnalyzer:
+class InterAnalyzer:
     """
     used for detect invalid view inside view tree by comparing
     also used for generating completeness score for those visible view
@@ -291,7 +291,7 @@ class IntraAnalyzer:
             self.dataset[node_id] = node_info
             self.init_dataset(child)
 
-    def set_property_to_node_intra_info(self, node_id, property_name, value):
+    def set_property_to_node_inter_info(self, node_id, property_name, value):
         """
         according to the given key, set information for an node inside result memo
         :param node_id:
@@ -302,7 +302,7 @@ class IntraAnalyzer:
             self.result[node_id] = {}
         self.result[node_id][property_name] = value
 
-    def get_property_to_node_intra_info(self, node_id, property_name):
+    def get_property_to_node_inter_info(self, node_id, property_name):
         """
         get information of an node from result memo
         :param node_id:
@@ -346,12 +346,12 @@ class IntraAnalyzer:
                 child_helper_id_seq = parent_helper_ids + [child_id]
                 child_helper_id_index_seq = parent_helper_id_indices + [index]
                 if "text_mText" in child.attrib:
-                    self.set_property_to_node_intra_info(child_id, "text", child.attrib["text_mText"])
+                    self.set_property_to_node_inter_info(child_id, "text", child.attrib["text_mText"])
                 else:
-                    self.set_property_to_node_intra_info(child_id, "text", None)
-                self.set_property_to_node_intra_info(child_id, "helper_id_seq", child_helper_id_seq)
-                self.set_property_to_node_intra_info(child_id, "xpath", child.getroottree().getpath(child))
-                self.set_property_to_node_intra_info(child_id, "helper_id_seq", child_helper_id_index_seq)
+                    self.set_property_to_node_inter_info(child_id, "text", None)
+                self.set_property_to_node_inter_info(child_id, "helper_id_seq", child_helper_id_seq)
+                self.set_property_to_node_inter_info(child_id, "xpath", child.getroottree().getpath(child))
+                self.set_property_to_node_inter_info(child_id, "helper_id_seq", child_helper_id_index_seq)
                 self.id_identifier(child, child_helper_id_seq, child_helper_id_index_seq)
                 id_count[child_helper_id] += 1
             else:
@@ -441,7 +441,7 @@ class IntraAnalyzer:
             corresponding_node = self.dataset[child_ids[index]]
             if corresponding_node.width * corresponding_node.height <= 1:
                 print(f"this component {child_ids[index]} is not distinguishable")
-                self.set_property_to_node_intra_info(child_ids[index], "invisible", True)
+                self.set_property_to_node_inter_info(child_ids[index], "invisible", True)
                 continue
             component_layer, component_rect = corresponding_node.compute_layer_inside_rect(parent_node_info.get_rect())
             if component_rect is None:
@@ -474,7 +474,7 @@ class IntraAnalyzer:
                     break
             if same:
                 print(f"this component {child_ids[index]} is the same with its background")
-                self.set_property_to_node_intra_info(child_ids[index], "invisible", True)
+                self.set_property_to_node_inter_info(child_ids[index], "invisible", True)
                 continue
 
             template_rect = template_layer.get_rectangle()
@@ -612,7 +612,7 @@ class IntraAnalyzer:
                 saved_img_path = os.path.join(found_path, str(child_ids[index]) + "result.png")
                 plt.savefig(saved_img_path, dpi=600)
             else:
-                self.set_property_to_node_intra_info(child_ids[index], "invisible", True)
+                self.set_property_to_node_inter_info(child_ids[index], "invisible", True)
                 print(f"{child_ids[index]} is not visible")
                 saved_img_path = os.path.join(not_found_path, str(child_ids[index]) + "result.png")
                 plt.savefig(saved_img_path, dpi=600)
@@ -681,12 +681,12 @@ class IntraAnalyzer:
             result_list.extend(sorted(ordered_dict[z_key], key=order_function, reverse=True))
         return result_list
 
-    def intra_view_analysis(self):
+    def inter_view_analysis(self):
         rm_tree(self.sub_director)
         pathlib.Path(self.sub_director).mkdir(parents=True, exist_ok=True)
         root_id = self.root_node_info.id
         start_time = time.time()
-        self.intra_analysis1(root_id, None, root_id)
+        self.inter_analysis1(root_id, None, root_id)
         end_time = time.time()
         result = json.dumps(self.result, indent="\t")
         result_path = os.path.join(self.sub_director, "intra_analysis_output.json")
@@ -712,7 +712,7 @@ class IntraAnalyzer:
         content = crop_scrollable_node_out(node.node, content)
         return content
 
-    def intra_analysis1(self, tree_node_id,
+    def inter_analysis1(self, tree_node_id,
                         parent_visible_region_rect,
                         background_node_id,
                         can_scroll_horizontally=False,
@@ -720,7 +720,7 @@ class IntraAnalyzer:
         tree_node_info = self.dataset[tree_node_id]
         visible_region_rect = tree_node_info.compute_content_area()
         if can_scroll_horizontally or can_scroll_vertically:
-            self.set_property_to_node_intra_info(tree_node_id, "scrollable", True)
+            self.set_property_to_node_inter_info(tree_node_id, "scrollable", True)
             parent_visible_region_rect = None
         # check if this canvas is bigger than parent, if so,
         # then check if it is scrollable, if not, then clip this node
@@ -762,7 +762,7 @@ class IntraAnalyzer:
                 saved_img_path = os.path.join(saved_dir, f"{tree_node_id}_result.png")
                 plt.savefig(saved_img_path, dpi=600)
                 plt.clf()
-                self.set_property_to_node_intra_info(tree_node_id, "invisible", True)
+                self.set_property_to_node_inter_info(tree_node_id, "invisible", True)
             elif child_is_partly_visible:
                 ax1 = plt.subplot(1, 2, 1)
                 ax1.imshow(
@@ -779,17 +779,17 @@ class IntraAnalyzer:
                 saved_img_path = os.path.join(saved_dir, f"{tree_node_id}_result.png")
                 plt.savefig(saved_img_path, dpi=600)
                 plt.clf()
-                self.set_property_to_node_intra_info(tree_node_id, "clipped", True)
+                self.set_property_to_node_inter_info(tree_node_id, "clipped", True)
                 print(f"{tree_node_id} is partly visible for its parent.")
             else:
-                self.set_property_to_node_intra_info(tree_node_id, "fully_visible", True)
+                self.set_property_to_node_inter_info(tree_node_id, "fully_visible", True)
         ordered_child_list = self.order_child_by_z_index_and_seq_index(exist_child_ids_list)
         sum_shadow_area = visible_region_rect
         shadow_siblings = []
         for child_id in ordered_child_list:
             overlapped_siblings = []
             overlapped_siblings_id = []
-            self.set_property_to_node_intra_info(child_id, "overlapped_siblings", overlapped_siblings)
+            self.set_property_to_node_inter_info(child_id, "overlapped_siblings", overlapped_siblings)
             child_node_info = self.dataset[child_id]
 
             child_content_area_region_rect = self.crop_scrollable_out(child_node_info)
@@ -808,11 +808,11 @@ class IntraAnalyzer:
                 new_background_node_id = child_id
             can_scroll_vertically = tree_node_info.can_scroll_vertically
             can_scroll_horizontally = tree_node_info.can_scroll_horizontally
-            self.intra_analysis1(child_id, sum_shadow_area, new_background_node_id, can_scroll_horizontally,
+            self.inter_analysis1(child_id, sum_shadow_area, new_background_node_id, can_scroll_horizontally,
                                  can_scroll_vertically)
             self.draw_overlapping_nodes(child_id, overlapped_siblings_id)
-            self.set_property_to_node_intra_info(child_id, "overlapped_siblings_id", overlapped_siblings_id)
-            self.set_property_to_node_intra_info(child_id, "overlapped_siblings", overlapped_siblings)
+            self.set_property_to_node_inter_info(child_id, "overlapped_siblings_id", overlapped_siblings_id)
+            self.set_property_to_node_inter_info(child_id, "overlapped_siblings", overlapped_siblings)
             if not child_node_info.is_drawer:
                 sum_shadow_area = RegionRect.compute_visible_subintersect(sum_shadow_area,
                                                                           child_content_area_region_rect)
@@ -863,7 +863,7 @@ def dumper(obj):
         return obj.__dict__
 
 
-def compute_inter_feature(image_path):
+def compute_intra_feature(image_path):
     image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
     alpha_layer = image[:, :, -1:]
     rgb_layer = image[:, :, :-1]
@@ -883,7 +883,7 @@ def compute_inter_feature(image_path):
     return c.keys()[0]
 
 
-def compute_inter_feature_of_text(image_node_info):
+def compute_intra_feature_of_text(image_node_info):
     image = cv2.imread(image_node_info.png_path, cv2.IMREAD_UNCHANGED)
 
     node = image_node_info.node
@@ -956,7 +956,7 @@ def compute_inter_feature_of_text(image_node_info):
     }
 
 
-def compute_inter_feature_of_image(image_node_info):
+def compute_intra_feature_of_image(image_node_info):
     image = cv2.imread(image_node_info.png_path, cv2.IMREAD_UNCHANGED)
 
     node = image_node_info.node
@@ -1157,7 +1157,7 @@ def compute_ssim(normal_image_path, bigger_image_path):
     return ssim_noise
 
 
-def inter_view_anlysis(normal_tree, bigger_tree, pairs, result_dir, normal_activity_inter_result, standard_ratio,
+def intra_view_anlysis(normal_tree, bigger_tree, pairs, result_dir, normal_activity_inter_result, standard_ratio,
                        buggy_view_ids):
     """
 
@@ -1219,8 +1219,8 @@ def inter_view_anlysis(normal_tree, bigger_tree, pairs, result_dir, normal_activ
         if "text_mText" in bigger_node_info.node.attrib:
             if normal_view_id == "31be7ff" and bigger_view_id == "4619a3e":
                 normal_view_id = "31be7ff"
-            normal_image = compute_inter_feature_of_text(normal_node_info)
-            bigger_image = compute_inter_feature_of_text(bigger_node_info)
+            normal_image = compute_intra_feature_of_text(normal_node_info)
+            bigger_image = compute_intra_feature_of_text(bigger_node_info)
             ratio = compute_ratio_of_two_areas(bigger_image["areas"], normal_image["areas"])
             ratio_inv = compute_ratio_of_two_areas(bigger_image["inverse_areas"], normal_image["inverse_areas"])
 
@@ -1286,8 +1286,8 @@ def inter_view_anlysis(normal_tree, bigger_tree, pairs, result_dir, normal_activ
 
             continue
         else:
-            normal_image = compute_inter_feature_of_image(normal_node_info)
-            bigger_image = compute_inter_feature_of_image(bigger_node_info)
+            normal_image = compute_intra_feature_of_image(normal_node_info)
+            bigger_image = compute_intra_feature_of_image(bigger_node_info)
 
             connected_part_normal = len(normal_image["areas"])
             connected_part_bigger = len(bigger_image["areas"])
@@ -1392,7 +1392,7 @@ def inter_view_anlysis(normal_tree, bigger_tree, pairs, result_dir, normal_activ
     return result
 
 
-def intra_view_analysis_result(normal_tree, bigger_tree, pairs, result_dir, normal_denoise, bigger_denoise,
+def inter_view_analysis_result(normal_tree, bigger_tree, pairs, result_dir, normal_denoise, bigger_denoise,
                                buggy_view_ids):
     """
 
@@ -1577,7 +1577,7 @@ def get_inter_and_intra_result(normal_activity_inter_result,
                                postfix,
                                ratio, buggy_view_ids):
     inter_time = time.time()
-    intra_result = intra_view_analysis_result(normal_activity_inter_result,
+    inter_result = inter_view_analysis_result(normal_activity_inter_result,
                                               bigger_activity_inter_result,
                                               result_normal_middle,
                                               os.path.join(page_result_dir, f"intra_{postfix}"),
@@ -1586,12 +1586,12 @@ def get_inter_and_intra_result(normal_activity_inter_result,
                                               buggy_view_ids)
     inter_time_end = time.time()
     inter_times.append(inter_time_end - inter_time)
-    intra_result_string = json.dumps(intra_result, default=dumper, indent=2)
-    intra_result_path = os.path.join(page_result_dir, f"intra_{postfix}_result.json")
+    intra_result_string = json.dumps(inter_result, default=dumper, indent=2)
+    intra_result_path = os.path.join(page_result_dir, f"inter_{postfix}_result.json")
     with open(intra_result_path, 'w') as f:
         f.write(intra_result_string)
     intra_time = time.time()
-    inter_result = inter_view_anlysis(normal_activity,
+    intra_result = intra_view_anlysis(normal_activity,
                                       bigger_activity,
                                       result_normal_middle,
                                       os.path.join(page_result_dir, f"inter_{postfix}"),
@@ -1600,16 +1600,16 @@ def get_inter_and_intra_result(normal_activity_inter_result,
                                       buggy_view_ids)
     intra_time_end = time.time()
     intra_times.append(intra_time_end - intra_time)
-    inter_result_string = json.dumps(inter_result, default=dumper, indent=2)
+    inter_result_string = json.dumps(intra_result, default=dumper, indent=2)
 
-    inter_result_path = os.path.join(page_result_dir, f"inter_{postfix}_result.json")
+    inter_result_path = os.path.join(page_result_dir, f"intra_{postfix}_result.json")
     with open(inter_result_path, 'w') as f:
         f.write(inter_result_string)
 
     buggy_view_ids = []
 
-    if len(intra_result["inconsistency"]) > 0 or len(inter_result["inconsistency"]) > 0:
-        for inconsistency_item in intra_result["inconsistency"]:
+    if len(inter_result["inconsistency"]) > 0 or len(inter_result["inconsistency"]) > 0:
+        for inconsistency_item in inter_result["inconsistency"]:
             if "bigger_view_id" in inconsistency_item:
                 buggy_view_ids.append(inconsistency_item["bigger_view_id"])
             else:
@@ -1695,27 +1695,27 @@ if __name__ == '__main__':
                 page_director = fragment_dirs[-1]
 
                 if size_int == 7:
-                    normal_activity = IntraAnalyzer(
+                    normal_activity = InterAnalyzer(
                         page_director=page_director,
                         sub_director=os.path.join(page_result_dir, f"{size_int}_{fs_int}_{wm_int}"))
                     normal_mapping_size = MappingSize(normal_activity.root, 7, normal_activity)
                     if not os.path.exists(os.path.join(page_result_dir, f"{size_int}_{fs_int}_{wm_int}",
-                                                       "intra_analysis_output.json")):
-                        normal_activity_inter_result = normal_activity.intra_view_analysis()
+                                                       "inter_analysis_output.json")):
+                        normal_activity_inter_result = normal_activity.inter_view_analysis()
                     else:
                         with open(os.path.join(page_result_dir, f"{size_int}_{fs_int}_{wm_int}",
-                                               "intra_analysis_output.json"), 'r') as f:
+                                               "inter_analysis_output.json"), 'r') as f:
                             normal_activity_inter_result = json.load(f)
                     continue
 
                 if size_int == 10:
-                    middle_activity = IntraAnalyzer(
+                    middle_activity = InterAnalyzer(
                         page_director=page_director,
                         sub_director=os.path.join(page_result_dir, f"{size_int}_{fs_int}_{wm_int}"))
                     middle_mapping_size = MappingSize(middle_activity.root, 10, middle_activity)
                     if not os.path.exists(os.path.join(page_result_dir, f"{size_int}_{fs_int}_{wm_int}",
                                                        "intra_analysis_output.json")):
-                        middle_activity_inter_result = middle_activity.intra_view_analysis()
+                        middle_activity_inter_result = middle_activity.inter_view_analysis()
                     else:
                         with open(os.path.join(page_result_dir, f"{size_int}_{fs_int}_{wm_int}",
                                                "intra_analysis_output.json"), 'r') as f:
@@ -1723,16 +1723,16 @@ if __name__ == '__main__':
                     continue
 
                 if size_int == 20:
-                    bigger_activity = IntraAnalyzer(
+                    bigger_activity = InterAnalyzer(
                         page_director=page_director,
                         sub_director=os.path.join(page_result_dir, f"{size_int}_{fs_int}_{wm_int}"))
                     bigger_mapping_size = MappingSize(bigger_activity.root, 20, bigger_activity)
                     if not os.path.exists(os.path.join(page_result_dir, f"{size_int}_{fs_int}_{wm_int}",
-                                                       "intra_analysis_output.json")):
-                        bigger_activity_inter_result = bigger_activity.intra_view_analysis()
+                                                       "inter_analysis_output.json")):
+                        bigger_activity_inter_result = bigger_activity.inter_view_analysis()
                     else:
                         with open(os.path.join(page_result_dir, f"{size_int}_{fs_int}_{wm_int}",
-                                               "intra_analysis_output.json"), 'r') as f:
+                                               "inter_analysis_output.json"), 'r') as f:
                             bigger_activity_inter_result = json.load(f)
 
             mapping_tool = MappingTool([normal_mapping_size, middle_mapping_size, bigger_mapping_size])
