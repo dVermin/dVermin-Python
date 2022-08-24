@@ -1,6 +1,6 @@
 ### Hi there 👋
 
-This is the repo for The Metamorphosis: Automatic Detection of Scaling Issues for Mobile Apps.
+This is the repo for The Metamorphosis: Automatic Detection of Scaling Issues for Mobile Apps. It contains the python implementation of dVermin.
 
 dVermin contains three phases, which are view mapping, inter-view inconsistent detection and intra-view detection
 analysis. This implementation will analyze the three view trees and the corresponding view image of three scale size
