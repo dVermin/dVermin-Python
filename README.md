@@ -10,3 +10,5 @@ combinations. This implementation is mainly in `dVermin.py` file.
 The first parameter is the package name you want to analyze; the second one is the output dir path; The third one is the path to your adb path on your computer; the last one is the path to your Android sdk on computer. Please choose the emulator from AOSP.
 
 You could check out our dataset sample in `https://figshare.com/s/d60421220e6a3fcd27c9`.
+
+There is still a lack of comments in this implementation, and I will refactor them in future maintenance.
