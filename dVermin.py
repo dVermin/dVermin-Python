@@ -11,7 +11,7 @@ from skimage.transform import resize
 from skimage import img_as_float, img_as_ubyte
 from skimage.color import rgb2gray
 import glob
-import MTM
+import mtm as MTM
 import skimage
 from skimage import measure
 from lxml import etree
@@ -1662,12 +1662,16 @@ if __name__ == '__main__':
 
     app_dirs = glob.glob(os.path.join(raw_dataset_path, "*/"))
 
+    result_path = r"path/to/save/results"
+    if not os.path.exists(result_path):
+        os.mkdir(result_path)
+
     for app_dir in app_dirs:
         app_id = os.path.basename(os.path.normpath(app_dir))
         page_dirs = glob.glob(os.path.join(app_dir, "*/"))
         for page_dir in page_dirs:
             page_id = os.path.basename(os.path.normpath(page_dir))
-            size_dirs = glob.glob(os.path.join(page_dir, "*/"))
+            size_dirs = glob.glob(os.path.join(page_dir, "*ViewHierarchy/"))
             size_dirs = sorted(size_dirs, key=size_sorter)
             normal_activity = None
             bigger_activity = None
@@ -1678,7 +1682,7 @@ if __name__ == '__main__':
             middle_activity = None
             middle_mapping_size = None
             middle_activity_inter_result = None
-            page_result_dir = os.path.join("path/to/save/results", f"{app_id}_{page_id}")
+            page_result_dir = os.path.join(result_path, f"{app_id}_{page_id}")
 
             for size_dir in size_dirs:
                 p = re.compile('([0-9]+)_fs_([0-9]+)_wm_([0-9]+)_.*?')

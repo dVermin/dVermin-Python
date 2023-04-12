@@ -12,3 +12,7 @@ The first parameter is the package name you want to analyze; the second one is t
 You could check out our dataset sample in `https://figshare.com/s/d60421220e6a3fcd27c9`.
 
 There is still a lack of comments in this implementation, and I will refactor them in future maintenance.
+
+UPDATE:
+
+Please install the python libs specified in requirements.txt first.

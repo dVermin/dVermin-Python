@@ -1,5 +1,5 @@
 import cv2
-import MTM
+import mtm as MTM
 from rectangle import Rectangle
 import numpy as np
 
